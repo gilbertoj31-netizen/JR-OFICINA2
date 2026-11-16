@@ -1,0 +1,6 @@
+{
+  "name": "JR BIKE SHOP - Oficina",
+  "description": "Sistema de gerenciamento de ordens de serviço e fichas de revisão para a oficina JR BIKE SHOP.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

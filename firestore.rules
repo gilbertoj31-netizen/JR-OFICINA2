@@ -1,0 +1,124 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Global Safety Net
+    // ===============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isAdmin() {
+      return isEmailVerified() && request.auth.token.email == "jrbikeshopp@gmail.com";
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // ===============================================================
+    // Service Order Validation
+    // ===============================================================
+    function isValidServiceOrder(data) {
+      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 200 &&
+             data.bikeModel is string && data.bikeModel.size() > 0 && data.bikeModel.size() < 200 &&
+             data.status in ['Pendente', 'Em Andamento', 'Concluído'] &&
+             data.paymentStatus in ['Pendente', 'Pago'] &&
+             data.items is list &&
+             data.laborCost is number &&
+             data.washCost is number &&
+             data.discount is number &&
+             data.total is number &&
+             data.whatsapp is string &&
+             data.createdBy is string &&
+             (request.method == 'create' ? (data.createdBy == request.auth.uid && data.createdAt == request.time) : true);
+    }
+
+    match /serviceOrders/{orderId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidServiceOrder(incoming());
+      allow update: if isSignedIn() && isValidServiceOrder(incoming()) && 
+                    (existing().createdBy == request.auth.uid || isAdmin()) &&
+                    (incoming().createdBy == existing().createdBy) &&
+                    (incoming().createdAt == existing().createdAt);
+      allow delete: if isSignedIn() && (existing().createdBy == request.auth.uid || isAdmin());
+    }
+
+    // ===============================================================
+    // Customer Validation
+    // ===============================================================
+    function isValidCustomer(data) {
+      return data.name is string && data.name.size() > 0 && data.name.size() < 200 &&
+             data.whatsapp is string && data.whatsapp.size() > 0 && data.whatsapp.size() < 50 &&
+             data.createdBy is string &&
+             (request.method == 'create' ? (data.createdBy == request.auth.uid && data.createdAt == request.time) : true);
+    }
+
+    match /customers/{customerId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidCustomer(incoming());
+      allow update: if isSignedIn() && isValidCustomer(incoming()) && 
+                    (existing().createdBy == request.auth.uid || isAdmin()) &&
+                    (incoming().createdBy == existing().createdBy) &&
+                    (incoming().createdAt == existing().createdAt);
+      allow delete: if isSignedIn() && (existing().createdBy == request.auth.uid || isAdmin());
+    }
+
+    // ===============================================================
+    // Appointment Validation
+    // ===============================================================
+    function isValidAppointment(data) {
+      return data.customerName is string && data.customerName.size() > 0 && data.customerName.size() < 200 &&
+             data.whatsapp is string && data.whatsapp.size() > 0 && data.whatsapp.size() < 50 &&
+             data.serviceType is string && data.serviceType.size() > 0 &&
+             data.date is string &&
+             data.time is string &&
+             data.status in ['Agendado', 'Confirmado', 'Em Atendimento', 'Concluído', 'Cancelado'] &&
+             data.createdBy is string &&
+             (request.method == 'create' ? (data.createdBy == request.auth.uid && data.createdAt == request.time) : true);
+    }
+
+    match /appointments/{appointmentId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidAppointment(incoming());
+      allow update: if isSignedIn() && isValidAppointment(incoming()) && 
+                    (existing().createdBy == request.auth.uid || isAdmin()) &&
+                    (incoming().createdBy == existing().createdBy) &&
+                    (incoming().createdAt == existing().createdAt);
+      allow delete: if isSignedIn() && (existing().createdBy == request.auth.uid || isAdmin());
+    }
+
+    // ===============================================================
+    // Settings Validation
+    // ===============================================================
+    function isValidSettings(data) {
+      return data.storeName is string && data.storeName.size() > 0 &&
+             data.updatedBy == request.auth.uid &&
+             data.updatedAt == request.time;
+    }
+
+    match /settings/{docId} {
+      allow read: if isSignedIn();
+      allow write: if isAdmin() && isValidSettings(incoming());
+    }
+  }
+}

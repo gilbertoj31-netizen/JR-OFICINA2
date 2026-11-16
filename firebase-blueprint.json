@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "ServiceOrder": {
+      "title": "ServiceOrder",
+      "description": "A service order for a bicycle repair.",
+      "type": "object",
+      "properties": {
+        "customerName": { "type": "string" },
+        "bikeModel": { "type": "string" },
+        "mechanicName": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "date": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pendente", "Em Andamento", "Concluído"] },
+        "paymentStatus": { "type": "string", "enum": ["Pendente", "Pago"] },
+        "items": { "type": "array" },
+        "laborCost": { "type": "number" },
+        "washCost": { "type": "number" },
+        "total": { "type": "number" },
+        "observations": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerName", "bikeModel", "status", "createdBy"]
+    },
+    "Customer": {
+      "title": "Customer",
+      "description": "A customer of the bike shop.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "email": { "type": "string" },
+        "address": { "type": "string" },
+        "bikeModel": { "type": "string" },
+        "lastServiceDate": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "whatsapp", "createdBy"]
+    },
+    "Appointment": {
+      "title": "Appointment",
+      "description": "A scheduled service or revision appointment.",
+      "type": "object",
+      "properties": {
+        "customerName": { "type": "string" },
+        "whatsapp": { "type": "string" },
+        "bikeModel": { "type": "string" },
+        "serviceType": { "type": "string" },
+        "date": { "type": "string" },
+        "time": { "type": "string" },
+        "status": { "type": "string", "enum": ["Agendado", "Confirmado", "Em Atendimento", "Concluído", "Cancelado"] },
+        "notes": { "type": "string" },
+        "createdBy": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["customerName", "whatsapp", "serviceType", "date", "time", "status", "createdBy"]
+    }
+  },
+  "firestore": {
+    "/serviceOrders": {
+      "schema": "ServiceOrder",
+      "description": "Collection of service orders."
+    },
+    "/customers": {
+      "schema": "Customer",
+      "description": "Collection of customers."
+    },
+    "/appointments": {
+      "schema": "Appointment",
+      "description": "Collection of scheduled revision appointments."
+    }
+  }
+}

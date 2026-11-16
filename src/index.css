@@ -1,0 +1,43 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #00FF00;
+  --color-accent: #00FF00;
+  --color-neon: #00FF00;
+  --color-ink: #FFFFFF;
+  --color-paper: #000000;
+}
+
+body {
+  background-color: #000000;
+  color: #FFFFFF;
+}
+
+.markdown-body {
+  @apply text-inherit;
+}
+
+.markdown-body p {
+  @apply mb-2;
+}
+
+.markdown-body ul {
+  @apply list-disc pl-4 mb-2;
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 0, 0.2);
+    border-radius: 10px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 0, 0.4);
+  }
+}
